@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Your Name">
+<meta name="dcterms.date" content="2026-05-17">
+
+<title>Poisson Regression and Maximum Likelihood Estimation – Homework 2 Replication</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Homework 2 Replication</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./W2.html"> 
+<span class="menu-text">Homework 2</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#exploring-the-data" id="toc-exploring-the-data" class="nav-link" data-scroll-target="#exploring-the-data">Exploring the Data</a>
+  <ul class="collapse">
+  <li><a href="#patent-counts-by-customer-status" id="toc-patent-counts-by-customer-status" class="nav-link" data-scroll-target="#patent-counts-by-customer-status">Patent Counts by Customer Status</a></li>
+  <li><a href="#regional-differences" id="toc-regional-differences" class="nav-link" data-scroll-target="#regional-differences">Regional Differences</a></li>
+  <li><a href="#firm-age-by-customer-status" id="toc-firm-age-by-customer-status" class="nav-link" data-scroll-target="#firm-age-by-customer-status">Firm Age by Customer Status</a></li>
+  </ul></li>
+  <li><a href="#a-simple-poisson-model-via-maximum-likelihood" id="toc-a-simple-poisson-model-via-maximum-likelihood" class="nav-link" data-scroll-target="#a-simple-poisson-model-via-maximum-likelihood">A Simple Poisson Model via Maximum Likelihood</a>
+  <ul class="collapse">
+  <li><a href="#coding-the-log-likelihood" id="toc-coding-the-log-likelihood" class="nav-link" data-scroll-target="#coding-the-log-likelihood">Coding the Log-Likelihood</a></li>
+  <li><a href="#plotting-the-log-likelihood" id="toc-plotting-the-log-likelihood" class="nav-link" data-scroll-target="#plotting-the-log-likelihood">Plotting the Log-Likelihood</a></li>
+  <li><a href="#numerical-optimization" id="toc-numerical-optimization" class="nav-link" data-scroll-target="#numerical-optimization">Numerical Optimization</a></li>
+  </ul></li>
+  <li><a href="#poisson-regression" id="toc-poisson-regression" class="nav-link" data-scroll-target="#poisson-regression">Poisson Regression</a>
+  <ul class="collapse">
+  <li><a href="#constructing-the-design-matrix" id="toc-constructing-the-design-matrix" class="nav-link" data-scroll-target="#constructing-the-design-matrix">Constructing the Design Matrix</a></li>
+  <li><a href="#poisson-regression-log-likelihood" id="toc-poisson-regression-log-likelihood" class="nav-link" data-scroll-target="#poisson-regression-log-likelihood">Poisson Regression Log-Likelihood</a></li>
+  <li><a href="#estimating-the-model-with-optim" id="toc-estimating-the-model-with-optim" class="nav-link" data-scroll-target="#estimating-the-model-with-optim">Estimating the Model with optim()</a></li>
+  <li><a href="#checking-against-glm" id="toc-checking-against-glm" class="nav-link" data-scroll-target="#checking-against-glm">Checking Against glm()</a></li>
+  <li><a href="#interpreting-the-results" id="toc-interpreting-the-results" class="nav-link" data-scroll-target="#interpreting-the-results">Interpreting the Results</a></li>
+  </ul></li>
+  <li><a href="#the-effect-of-blueprintys-software" id="toc-the-effect-of-blueprintys-software" class="nav-link" data-scroll-target="#the-effect-of-blueprintys-software">The Effect of Blueprinty’s Software</a>
+  <ul class="collapse">
+  <li><a href="#counterfactual-predictions" id="toc-counterfactual-predictions" class="nav-link" data-scroll-target="#counterfactual-predictions">Counterfactual Predictions</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Poisson Regression and Maximum Likelihood Estimation</h1>
+<p class="subtitle lead">A Case Study of Blueprinty’s Software and Patent Awards</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Your Name </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 17, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Blueprinty is a small software company that develops blueprint design tools specifically for engineering firms submitting patent applications to the US Patent Office. The company’s marketing team would like to argue that firms using Blueprinty’s software are more successful in obtaining patent awards.</p>
+<p>Ideally, we would evaluate this claim using longitudinal data that track firms before and after adopting Blueprinty’s software. However, such data are unavailable. Instead, Blueprinty has collected cross-sectional data on 1,500 mature engineering firms. The dataset includes the number of patents awarded to each firm over the last five years, the firm’s regional location, firm age, and whether the firm is a Blueprinty customer.</p>
+<p>This makes the marketing claim difficult to evaluate causally. Blueprinty’s customers are not randomly assigned to use the software. Firms choosing to adopt Blueprinty may differ systematically from non-customers in ways that also affect patenting activity. For example, customers may be older firms with more established research pipelines or may operate in regions with stronger innovation ecosystems. As a result, any raw difference in patent counts could reflect these underlying differences rather than the software itself.</p>
+<p>In this analysis, I use Poisson regression estimated via Maximum Likelihood Estimation (MLE) to examine whether Blueprinty customer status is associated with higher patent counts after controlling for firm age and regional differences.</p>
+<hr>
+</section>
+<section id="exploring-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-the-data">Exploring the Data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"blueprinty.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>iscustomer <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(df<span class="sc">$</span>iscustomer)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(df<span class="sc">$</span>region)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    patents             region         age        iscustomer
+ Min.   : 0.000   Midwest  :224   Min.   : 9.00   0:1019    
+ 1st Qu.: 2.000   Northeast:601   1st Qu.:21.00   1: 481    
+ Median : 3.000   Northwest:187   Median :26.00             
+ Mean   : 3.685   South    :191   Mean   :26.36             
+ 3rd Qu.: 5.000   Southwest:297   3rd Qu.:31.62             
+ Max.   :16.000                   Max.   :49.00             </code></pre>
+</div>
+</div>
+<section id="patent-counts-by-customer-status" class="level3">
+<h3 class="anchored" data-anchor-id="patent-counts-by-customer-status">Patent Counts by Customer Status</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(patents <span class="sc">~</span> iscustomer, <span class="at">data =</span> df, mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  iscustomer  patents
+1          0 3.473013
+2          1 4.133056</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw3_questions_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The histograms suggest that Blueprinty customers tend to have somewhat higher patent counts than non-customers. However, this difference alone does not establish that the software causes higher patent output. Customer firms may differ systematically in other characteristics that also influence patenting activity.</p>
+</section>
+<section id="regional-differences" class="level3">
+<h3 class="anchored" data-anchor-id="regional-differences">Regional Differences</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw3_questions_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The regional distribution differs somewhat between customers and non-customers. This matters because some regions may have stronger innovation ecosystems, larger engineering sectors, or more favorable business environments that naturally generate higher patent counts.</p>
+</section>
+<section id="firm-age-by-customer-status" class="level3">
+<h3 class="anchored" data-anchor-id="firm-age-by-customer-status">Firm Age by Customer Status</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw3_questions_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Firm age distributions also differ between customers and non-customers. Older firms may have accumulated more resources, larger R&amp;D operations, and more experience with the patenting process. Ignoring these differences could bias estimates of Blueprinty’s effect.</p>
+<hr>
+</section>
+</section>
+<section id="a-simple-poisson-model-via-maximum-likelihood" class="level2">
+<h2 class="anchored" data-anchor-id="a-simple-poisson-model-via-maximum-likelihood">A Simple Poisson Model via Maximum Likelihood</h2>
+<p>The outcome variable in this analysis is a count: the number of patents awarded over the last five years. Count outcomes cannot be negative and are restricted to integer values, making the Normal distribution inappropriate. The Poisson distribution is the standard starting point for modeling non-negative count data.</p>
+<p>Assume:</p>
+<p><span class="math display">\[
+Y_i \sim \text{Poisson}(\lambda)
+\]</span></p>
+<p>with probability mass function:</p>
+<p><span class="math display">\[
+f(Y_i|\lambda) = \frac{e^{-\lambda}\lambda^{Y_i}}{Y_i!}
+\]</span></p>
+<p>Assuming observations are independent and identically distributed, the joint likelihood is:</p>
+<p><span class="math display">\[
+L(\lambda|Y) = \prod_{i=1}^N \frac{e^{-\lambda}\lambda^{Y_i}}{Y_i!}
+\]</span></p>
+<p>Taking logs:</p>
+<p><span class="math display">\[
+\log L(\lambda|Y)
+=
+\sum_{i=1}^N
+\left(
+-\lambda + Y_i \log(\lambda) - \log(Y_i!)
+\right)
+\]</span></p>
+<section id="coding-the-log-likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="coding-the-log-likelihood">Coding the Log-Likelihood</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>poisson_loglikelihood <span class="ot">&lt;-</span> <span class="cf">function</span>(lambda, Y){</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(lambda <span class="sc">&lt;=</span> <span class="dv">0</span>){</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="sc">-</span><span class="cn">Inf</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  ll <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">dpois</span>(Y, lambda, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(ll)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="plotting-the-log-likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-the-log-likelihood">Plotting the Log-Likelihood</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw3_questions_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The log-likelihood curve reaches its maximum at the value of \(\) that best fits the observed data. Visually, the peak of the curve corresponds to the Maximum Likelihood Estimate (MLE).</p>
+</section>
+<section id="numerical-optimization" class="level3">
+<h3 class="anchored" data-anchor-id="numerical-optimization">Numerical Optimization</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>neg_loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(lambda, Y){</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">poisson_loglikelihood</span>(lambda, Y)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>mle_result <span class="ot">&lt;-</span> <span class="fu">optim</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">par =</span> <span class="fu">mean</span>(df<span class="sc">$</span>patents),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fn =</span> neg_loglik,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Y =</span> df<span class="sc">$</span>patents,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"L-BFGS-B"</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">lower =</span> <span class="fl">0.001</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>mle_result<span class="sc">$</span>par</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.684667</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(df<span class="sc">$</span>patents)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.684667</code></pre>
+</div>
+</div>
+<p>The numerical MLE obtained from <code>optim()</code> is essentially identical to the sample mean. This makes sense because the mean of a Poisson distribution is equal to its rate parameter \(\).</p>
+<hr>
+</section>
+</section>
+<section id="poisson-regression" class="level2">
+<h2 class="anchored" data-anchor-id="poisson-regression">Poisson Regression</h2>
+<p>The simple Poisson model assumes every firm shares the same patent rate \(\). This is unrealistic because firms differ in age, region, and customer status. Poisson regression allows each firm to have its own rate parameter:</p>
+<p><span class="math display">\[
+Y_i \sim \text{Poisson}(\lambda_i)
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+\lambda_i = \exp(X_i'\beta)
+\]</span></p>
+<p>The exponential link function ensures that \(_i\) remains strictly positive even though the linear predictor \(X_i’\) can take any real value.</p>
+<section id="constructing-the-design-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="constructing-the-design-matrix">Constructing the Design Matrix</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>age2 <span class="ot">&lt;-</span> df<span class="sc">$</span>age<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span> age <span class="sc">+</span> age2 <span class="sc">+</span> region <span class="sc">+</span> iscustomer,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> df</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> df<span class="sc">$</span>patents</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Age squared is included because the relationship between firm age and patenting is unlikely to be perfectly linear. One region category is omitted automatically to avoid perfect multicollinearity with the intercept.</p>
+</section>
+<section id="poisson-regression-log-likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="poisson-regression-log-likelihood">Poisson Regression Log-Likelihood</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>poisson_regression_loglikelihood <span class="ot">&lt;-</span> <span class="cf">function</span>(beta, Y, X){</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  lambda <span class="ot">&lt;-</span> <span class="fu">exp</span>(X <span class="sc">%*%</span> beta)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  ll <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">dpois</span>(Y, lambda, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="sc">-</span>ll)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="estimating-the-model-with-optim" class="level3">
+<h3 class="anchored" data-anchor-id="estimating-the-model-with-optim">Estimating the Model with optim()</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>beta_start <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(X))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>optim_results <span class="ot">&lt;-</span> <span class="fu">optim</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">par =</span> beta_start,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fn =</span> poisson_regression_loglikelihood,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Y =</span> Y,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">X =</span> X,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">hessian =</span> <span class="cn">TRUE</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>beta_hat <span class="ot">&lt;-</span> optim_results<span class="sc">$</span>par</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>vcov_matrix <span class="ot">&lt;-</span> <span class="fu">solve</span>(optim_results<span class="sc">$</span>hessian)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>standard_errors <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(vcov_matrix))</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>results_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">Variable =</span> <span class="fu">colnames</span>(X),</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">Coefficient =</span> <span class="fu">round</span>(beta_hat, <span class="dv">4</span>),</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">Std_Error =</span> <span class="fu">round</span>(standard_errors, <span class="dv">4</span>)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>results_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         Variable Coefficient Std_Error
+1     (Intercept)     -0.2488    0.1123
+2             age      0.1326    0.0065
+3            age2     -0.0027    0.0001
+4 regionNortheast     -0.0261    0.0430
+5 regionNorthwest     -0.0717    0.0534
+6     regionSouth     -0.0093    0.0524
+7 regionSouthwest     -0.0128    0.0468
+8     iscustomer1      0.2125    0.0309</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Coefficient</th>
+<th style="text-align: right;">Std_Error</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">-0.2488</td>
+<td style="text-align: right;">0.1123</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">age</td>
+<td style="text-align: right;">0.1326</td>
+<td style="text-align: right;">0.0065</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">age2</td>
+<td style="text-align: right;">-0.0027</td>
+<td style="text-align: right;">0.0001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">regionNortheast</td>
+<td style="text-align: right;">-0.0261</td>
+<td style="text-align: right;">0.0430</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">regionNorthwest</td>
+<td style="text-align: right;">-0.0717</td>
+<td style="text-align: right;">0.0534</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">regionSouth</td>
+<td style="text-align: right;">-0.0093</td>
+<td style="text-align: right;">0.0524</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">regionSouthwest</td>
+<td style="text-align: right;">-0.0128</td>
+<td style="text-align: right;">0.0468</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">iscustomer1</td>
+<td style="text-align: right;">0.2125</td>
+<td style="text-align: right;">0.0309</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="checking-against-glm" class="level3">
+<h3 class="anchored" data-anchor-id="checking-against-glm">Checking Against glm()</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>glm_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  patents <span class="sc">~</span> age <span class="sc">+</span> age2 <span class="sc">+</span> region <span class="sc">+</span> iscustomer,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">poisson</span>(),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> df</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = patents ~ age + age2 + region + iscustomer, family = poisson(), 
+    data = df)
+
+Coefficients:
+                 Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)     -0.508920   0.183179  -2.778  0.00546 ** 
+age              0.148619   0.013869  10.716  &lt; 2e-16 ***
+age2            -0.002971   0.000258 -11.513  &lt; 2e-16 ***
+regionNortheast  0.029170   0.043625   0.669  0.50372    
+regionNorthwest -0.017574   0.053781  -0.327  0.74383    
+regionSouth      0.056561   0.052662   1.074  0.28281    
+regionSouthwest  0.050576   0.047198   1.072  0.28391    
+iscustomer1      0.207591   0.030895   6.719 1.83e-11 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 2362.5  on 1499  degrees of freedom
+Residual deviance: 2143.3  on 1492  degrees of freedom
+AIC: 6532.1
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<p>The coefficient estimates from <code>glm()</code> closely match the estimates obtained using <code>optim()</code>. Small differences in standard errors may arise because <code>optim()</code> computes the Hessian numerically, while <code>glm()</code> uses built-in analytical routines.</p>
+</section>
+<section id="interpreting-the-results" class="level3">
+<h3 class="anchored" data-anchor-id="interpreting-the-results">Interpreting the Results</h3>
+<p>The coefficient on <code>iscustomer</code> is the primary quantity of interest. A positive coefficient implies that Blueprinty customers are associated with higher expected patent counts after controlling for firm age and region.</p>
+<p>Because the Poisson model is multiplicative, coefficients are interpreted in percentage terms after exponentiation. Specifically:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(glm_model))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    (Intercept)             age            age2 regionNortheast regionNorthwest 
+      0.6011446       1.1602314       0.9970339       1.0295997       0.9825790 
+    regionSouth regionSouthwest     iscustomer1 
+      1.0581915       1.0518769       1.2307094 </code></pre>
+</div>
+</div>
+<p>Exponentiating the customer coefficient gives the incidence rate ratio (IRR). Values above 1 indicate higher expected patent counts for Blueprinty customers relative to non-customers.</p>
+<hr>
+</section>
+</section>
+<section id="the-effect-of-blueprintys-software" class="level2">
+<h2 class="anchored" data-anchor-id="the-effect-of-blueprintys-software">The Effect of Blueprinty’s Software</h2>
+<p>The Poisson regression coefficients are not directly interpretable as “additional patents.” To produce a more intuitive estimate, I construct two counterfactual datasets.</p>
+<section id="counterfactual-predictions" class="level3">
+<h3 class="anchored" data-anchor-id="counterfactual-predictions">Counterfactual Predictions</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>X0 <span class="ot">&lt;-</span> X</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> X</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>customer_col <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">colnames</span>(X) <span class="sc">==</span> <span class="st">"iscustomer1"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>X0[, customer_col] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>X1[, customer_col] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>yhat0 <span class="ot">&lt;-</span> <span class="fu">exp</span>(X0 <span class="sc">%*%</span> beta_hat)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>yhat1 <span class="ot">&lt;-</span> <span class="fu">exp</span>(X1 <span class="sc">%*%</span> beta_hat)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>average_effect <span class="ot">&lt;-</span> <span class="fu">mean</span>(yhat1 <span class="sc">-</span> yhat0)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>average_effect</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8088787</code></pre>
+</div>
+</div>
+<p>The estimated average treatment effect suggests that Blueprinty customers are predicted to receive approximately this many additional patents over a five-year period relative to otherwise similar non-customers.</p>
+<p>This result provides evidence consistent with Blueprinty’s marketing claim. However, this analysis remains observational rather than experimental. Although the regression controls for age and region, there may still be unobserved differences between customer and non-customer firms that influence patenting outcomes. Therefore, the results should be interpreted as evidence of association rather than definitive causal proof.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
